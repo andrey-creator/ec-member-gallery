@@ -47,38 +47,46 @@ st.markdown("""
         background-color: #00f2ff !important;
         color: black !important;
     }
+
+    /* Pure Flexbox Grid that overrides Streamlit's mobile stacking behavior completely */
+    .roster-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px;
+    }
+    .member-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 140px; /* Perfectly controlled small width */
+        text-align: center;
+    }
+    .member-photo {
+        width: 140px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid rgba(0, 242, 255, 0.3);
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.15);
+        transition: transform 0.3s ease;
+    }
+    .member-photo:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+    }
     .img-label {
         text-align: center; 
         font-family: 'Rajdhani', sans-serif; 
         color: #00f2ff; 
-        font-size: 0.9rem; 
-        margin-top: 5px; 
-        margin-bottom: 25px;
+        font-size: 0.85rem; 
+        margin-top: 8px; 
+        margin-bottom: 0px;
         letter-spacing: 1px;
         font-weight: 600;
-    }
-
-    /* Solusi Absolut: Mengatur tata letak kontainer gambar Streamlit agar rata tengah di HP */
-    [data-testid="column"] {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }
-
-    /* Mengunci ukuran elemen gambar agar tetap kecil secara proporsional */
-    [data-testid="stImage"] {
-        max-width: 160px !important;
-        width: 160px !important;
-    }
-    
-    [data-testid="stImage"] img {
-        border-radius: 12px !important;
-        border: 1px solid rgba(0, 242, 255, 0.3) !important;
-        box-shadow: 0 0 10px rgba(0, 242, 255, 0.15) !important;
-        object-fit: contain !important; /* Mencegah gambar terpotong */
-        height: auto !important;
+        line-height: 1.2;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -140,9 +148,10 @@ with st.spinner("Retrieving Roster..."):
     daftar_foto = muat_foto_member(path_pencarian)
 
 if daftar_foto:
-    # Kembali menggunakan 6 kolom dasar agar tampilan desktop tetap estetik
-    cols = st.columns(6) 
-    for idx, url_atau_path in enumerate(daftar_foto):
+    # Building a pure custom HTML grid structure to enforce size limits everywhere
+    grid_html = '<div class="roster-grid">'
+    
+    for url_atau_path in daftar_foto:
         if "\\" in url_atau_path or "/" in url_atau_path:
             nama_file = url_atau_path.replace("\\", "/").split('/')[-1].split('.')[0]
         else:
@@ -150,9 +159,16 @@ if daftar_foto:
             
         clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
         
-        with cols[idx % 6]:
-            st.image(url_atau_path, use_container_width=True)
-            st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
+        # Injecting the profile photo cleanly inside our custom responsive component wrapper
+        grid_html += f'''
+        <div class="member-card">
+            <img src="{url_atau_path}" class="member-photo">
+            <p class="img-label">{clean_name}</p>
+        </div>
+        '''
+        
+    grid_html += '</div>'
+    st.markdown(grid_html, unsafe_allow_html=True)
 else:
     st.info(f"Belum ada data member untuk {pilihan_batch.replace('-', ' ').upper()} - {pilihan_kelas.replace('-', ' ').upper()}.")
 
