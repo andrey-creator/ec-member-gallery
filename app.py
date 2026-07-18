@@ -57,22 +57,19 @@ st.markdown("""
         letter-spacing: 1px;
         font-weight: 600;
     }
-    
-    /* Wrapper CSS untuk mengunci ukuran foto member agar tetap kecil di laptop maupun HP */
-    .member-card-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
+
+    /* Mengunci elemen image bawaan Streamlit agar dipaksa mengecil dan rata tengah */
+    [data-testid="stImage"] {
+        max-width: 160px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
-    .member-card-wrapper img {
-        max-width: 150px !important; /* Batasi lebar maksimal foto */
-        width: 100% !important;
-        height: auto !important;
-        object-fit: cover;
-        border-radius: 12px;
-        box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
-        border: 1px solid rgba(0, 242, 255, 0.3);
+    
+    [data-testid="stImage"] img {
+        border-radius: 12px !important;
+        border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.15) !important;
+        object-fit: cover !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -144,10 +141,7 @@ if daftar_foto:
         clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
         
         with cols[idx % 6]:
-            # Menyisipkan div wrapper HTML untuk memaksa style ukuran gambar mengecil
-            st.markdown('<div class="member-card-wrapper">', unsafe_allow_html=True)
             st.image(url_atau_path, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
             st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
 else:
     st.info(f"Belum ada data member untuk {pilihan_batch.replace('-', ' ').upper()} - {pilihan_kelas.replace('-', ' ').upper()}.")
