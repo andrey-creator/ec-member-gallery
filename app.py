@@ -58,11 +58,17 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* Mengunci elemen image bawaan Streamlit agar dipaksa mengecil dan rata tengah */
+    /* Perbaikan utama: Memaksa elemen pembungkus Streamlit agar kontennya berada di tengah */
+    [data-testid="element-container"]:has([data-testid="stImage"]) {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    /* Mengunci elemen image bawaan Streamlit agar dipaksa mengecil */
     [data-testid="stImage"] {
         max-width: 160px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        width: 160px !important;
     }
     
     [data-testid="stImage"] img {
