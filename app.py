@@ -79,14 +79,7 @@ st.markdown("""
         box-shadow: 0 0 10px rgba(0, 242, 255, 0.15) !important;
         margin: 0 auto !important;
     }
-    
-    /* Ensure mobile column blocks centers their text items cleanly */
-    [data-testid="column"] {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-    }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -147,22 +140,94 @@ with st.spinner("Retrieving Roster..."):
     daftar_foto = muat_foto_member(path_pencarian)
 
 if daftar_foto:
-    cols = st.columns(6) 
-    for idx, url_atau_path in enumerate(daftar_foto):
-        if "\\" in url_atau_path or "/" in url_atau_path:
-            nama_file = url_atau_path.replace("\\", "/").split('/')[-1].split('.')[0]
-        else:
-            nama_file = url_atau_path.split('.')[0]
-            
-        clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
-        
-        with cols[idx % 6]:
-            # Back to clean native image presentation with global structural overrides
-            st.image(url_atau_path, use_container_width=True)
-            st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
-else:
-    st.info(f"Belum ada data member untuk {pilihan_batch.replace('-', ' ').upper()} - {pilihan_kelas.replace('-', ' ').upper()}.")
 
+    st.markdown("""
+    <style>
+    .member-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+        gap:25px;
+        width:100%;
+        justify-items:center;
+    }
+
+    .member-card{
+        text-align:center;
+        width:100%;
+    }
+
+    .member-card img{
+        width:140px !important;
+        height:180px !important;
+        object-fit:cover !important;
+        border-radius:12px !important;
+        border:1px solid rgba(0,242,255,.3);
+        box-shadow:0 0 10px rgba(0,242,255,.15);
+    }
+
+    .member-name{
+        text-align:center;
+        font-family:'Rajdhani',sans-serif;
+        color:#00f2ff;
+        font-size:0.9rem;
+        margin-top:10px;
+        letter-spacing:1px;
+        font-weight:600;
+        line-height:1.3;
+    }
+
+    @media (max-width:768px){
+        .member-grid{
+            grid-template-columns:repeat(2,1fr);
+            gap:20px;
+        }
+
+        .member-card img{
+            width:120px !important;
+            height:160px !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    html = '<div class="member-grid">'
+
+    for url_atau_path in daftar_foto:
+
+        if "\\" in url_atau_path or "/" in url_atau_path:
+            nama_file = (
+                url_atau_path
+                .replace("\\", "/")
+                .split("/")[-1]
+                .split(".")[0]
+            )
+        else:
+            nama_file = url_atau_path.split(".")[0]
+
+        clean_name = (
+            unquote(nama_file)
+            .replace("-", " ")
+            .replace("_", " ")
+            .upper()
+        )
+
+        html += f"""
+        <div class="member-card">
+            <img src="{url_atau_path}">
+            <div class="member-name">{clean_name}</div>
+        </div>
+        """
+
+    html += "</div>"
+
+    st.markdown(html, unsafe_allow_html=True)
+
+else:
+    st.info(
+        f"Belum ada data member untuk "
+        f"{pilihan_batch.replace('-', ' ').upper()} - "
+        f"{pilihan_kelas.replace('-', ' ').upper()}."
+    )
 st.markdown("""
     <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid rgba(0, 242, 255, 0.2);">
         <p style="font-family: 'Rajdhani', sans-serif; color: #00f2ff; letter-spacing: 2px; font-size: 1.1rem; font-weight: 500; font-style: italic;">
