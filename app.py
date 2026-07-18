@@ -52,25 +52,13 @@ st.markdown("""
         font-family: 'Rajdhani', sans-serif; 
         color: #00f2ff; 
         font-size: 0.9rem; 
-        margin-top: 5px; 
+        margin-top: 8px; 
         margin-bottom: 25px;
         letter-spacing: 1px;
         font-weight: 600;
     }
 
-    /* Perbaikan utama: Memaksa elemen pembungkus Streamlit agar kontennya berada di tengah */
-    [data-testid="element-container"]:has([data-testid="stImage"]) {
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }
-
-    /* Mengunci elemen image bawaan Streamlit agar dipaksa mengecil */
-    [data-testid="stImage"] {
-        max-width: 160px !important;
-        width: 160px !important;
-    }
-    
+    /* Style khusus untuk mempercantik border dan kebulatan foto */
     [data-testid="stImage"] img {
         border-radius: 12px !important;
         border: 1px solid rgba(0, 242, 255, 0.3) !important;
@@ -137,8 +125,8 @@ with st.spinner("Retrieving Roster..."):
     daftar_foto = muat_foto_member(path_pencarian)
 
 if daftar_foto:
-    cols = st.columns(6) 
-    for idx, url_atau_path in enumerate(daftar_foto):
+    # Menggunakan perulangan baris demi baris, di mana setiap baris berisi foto yang diapit kolom kosong
+    for url_atau_path in daftar_foto:
         if "\\" in url_atau_path or "/" in url_atau_path:
             nama_file = url_atau_path.replace("\\", "/").split('/')[-1].split('.')[0]
         else:
@@ -146,7 +134,11 @@ if daftar_foto:
             
         clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
         
-        with cols[idx % 6]:
+        # Membuat 3 kolom dengan proporsi: Samping Kiri (2.2), Tengah (1.6), Samping Kanan (2.2)
+        # Struktur ini memaksa kolom tengah yang memuat foto berukuran pas dan tepat berada di tengah layar HP
+        col_kiri, col_tengah, col_kanan = st.columns([2.2, 1.6, 2.2])
+        
+        with col_tengah:
             st.image(url_atau_path, use_container_width=True)
             st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
 else:
