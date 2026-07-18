@@ -47,29 +47,45 @@ st.markdown("""
         background-color: #00f2ff !important;
         color: black !important;
     }
+    
     .img-label {
         text-align: center; 
         font-family: 'Rajdhani', sans-serif; 
         color: #00f2ff; 
-        font-size: 0.9rem; 
-        margin-top: 5px; 
+        font-size: 0.85rem; 
+        margin-top: 8px; 
         margin-bottom: 25px;
         letter-spacing: 1px;
         font-weight: 600;
+        line-height: 1.3;
     }
 
-    /* Memaksa elemen gambar Streamlit agar berukuran kecil dan rata tengah di semua perangkat */
-    .custom-card {
-        max-width: 140px !important;
-        margin: 0 auto !important;
+    /* Target the base container block of st.image elements */
+    [data-testid="stImageContainer"], [data-testid="stImage"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
     }
-    .custom-card [data-testid="stImage"] img {
+
+    /* Force the actual image node to stay locked at a clean 140px scale */
+    [data-testid="stImageContainer"] img {
+        max-width: 140px !important;
+        width: 140px !important;
+        height: 180px !important;
+        object-fit: cover !important;
         border-radius: 12px !important;
         border: 1px solid rgba(0, 242, 255, 0.3) !important;
         box-shadow: 0 0 10px rgba(0, 242, 255, 0.15) !important;
-        object-fit: cover !important;
-        height: 180px !important;
-        width: 140px !important;
+        margin: 0 auto !important;
+    }
+    
+    /* Ensure mobile column blocks centers their text items cleanly */
+    [data-testid="column"] {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -141,10 +157,8 @@ if daftar_foto:
         clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
         
         with cols[idx % 6]:
-            # Menggunakan wadah HTML kustom untuk membatasi ukuran st.image bawaan Streamlit
-            st.markdown('<div class="custom-card">', unsafe_allow_html=True)
+            # Back to clean native image presentation with global structural overrides
             st.image(url_atau_path, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
             st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
 else:
     st.info(f"Belum ada data member untuk {pilihan_batch.replace('-', ' ').upper()} - {pilihan_kelas.replace('-', ' ').upper()}.")
