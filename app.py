@@ -91,10 +91,6 @@ st.markdown("""
         letter-spacing: 1px;
     }
 
-    [data-testid="column"] {
-        min-width: 48% !important;
-        flex: 1 1 48% !important;
-    }
 
     [data-testid="stImage"] img {
         width: 120px !important;
@@ -166,43 +162,66 @@ with st.spinner("Retrieving Roster..."):
 
 if daftar_foto:
 
-    # Desktop = 6 kolom
-    cols = st.columns(6)
+    # 2 foto per baris
+    for i in range(0, len(daftar_foto), 2):
 
-    for idx, url_atau_path in enumerate(daftar_foto):
+        col1, col2 = st.columns(2)
 
-        if "\\" in url_atau_path or "/" in url_atau_path:
-            nama_file = (
-                url_atau_path.replace("\\", "/")
-                .split("/")[-1]
-                .split(".")[0]
+        # FOTO KIRI
+        with col1:
+
+            foto1 = daftar_foto[i]
+
+            nama1 = (
+                unquote(
+                    foto1.replace("\\", "/")
+                    .split("/")[-1]
+                    .split(".")[0]
+                )
+                .replace("-", " ")
+                .replace("_", " ")
+                .upper()
             )
-        else:
-            nama_file = url_atau_path.split(".")[0]
 
-        clean_name = (
-            unquote(nama_file)
-            .replace("-", " ")
-            .replace("_", " ")
-            .upper()
-        )
-
-        with cols[idx % 6]:
-
-            st.image(
-                url_atau_path,
-                use_container_width=False,
-                width=140
-            )
+            st.image(foto1, width=140)
 
             st.markdown(
                 f"""
                 <div class="img-label">
-                    {clean_name}
+                    {nama1}
                 </div>
                 """,
                 unsafe_allow_html=True
             )
+
+        # FOTO KANAN
+        if i + 1 < len(daftar_foto):
+
+            with col2:
+
+                foto2 = daftar_foto[i + 1]
+
+                nama2 = (
+                    unquote(
+                        foto2.replace("\\", "/")
+                        .split("/")[-1]
+                        .split(".")[0]
+                    )
+                    .replace("-", " ")
+                    .replace("_", " ")
+                    .upper()
+                )
+
+                st.image(foto2, width=140)
+
+                st.markdown(
+                    f"""
+                    <div class="img-label">
+                        {nama2}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
 else:
     st.info(
