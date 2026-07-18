@@ -169,15 +169,17 @@ with st.spinner("Retrieving Roster..."):
     daftar_foto = muat_foto_member(path_pencarian)
 
 if daftar_foto:
-    cards_html = ""
+    cards = []
     for foto in daftar_foto:
-        cards_html += f"""
-        <div class="roster-card">
-            <img src="{foto['src']}" alt="{foto['nama']}">
-            <div class="img-label">{foto['nama']}</div>
-        </div>
-        """
-    st.markdown(f'<div class="roster-grid">{cards_html}</div>', unsafe_allow_html=True)
+        nama_aman = foto['nama'].replace('"', '&quot;')
+        cards.append(
+            '<div class="roster-card">'
+            f'<img src="{foto["src"]}" alt="{nama_aman}">'
+            f'<div class="img-label">{nama_aman}</div>'
+            '</div>'
+        )
+    grid_html = '<div class="roster-grid">' + "".join(cards) + '</div>'
+    st.markdown(grid_html, unsafe_allow_html=True)
 else:
     st.info(
         f"Belum ada data member untuk "
