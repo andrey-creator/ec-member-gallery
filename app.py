@@ -47,43 +47,45 @@ st.markdown("""
         background-color: #00f2ff !important;
         color: black !important;
     }
+    
+    .img-label {
+        text-align: center; 
+        font-family: 'Rajdhani', sans-serif; 
+        color: #00f2ff; 
+        font-size: 0.85rem; 
+        margin-top: 8px; 
+        margin-bottom: 25px;
+        letter-spacing: 1px;
+        font-weight: 600;
+        line-height: 1.3;
+    }
 
-    /* Fixed inline grid layout forcing elements side-by-side everywhere */
-    .flex-roster-container {
+    /* Target the base container block of st.image elements */
+    [data-testid="stImageContainer"], [data-testid="stImage"] {
         display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
         justify-content: center !important;
-        gap: 16px !important;
-        width: 100% !important;
-        margin-top: 20px;
-    }
-
-    .flex-member-card {
-        display: flex !important;
-        flex-direction: column !important;
         align-items: center !important;
-        width: 135px !important;
-        text-align: center !important;
+        width: 100% !important;
     }
 
-    .flex-member-card img {
-        width: 135px !important;
-        height: 175px !important;
+    /* Force the actual image node to stay locked at a clean 140px scale */
+    [data-testid="stImageContainer"] img {
+        max-width: 140px !important;
+        width: 140px !important;
+        height: 180px !important;
         object-fit: cover !important;
         border-radius: 12px !important;
         border: 1px solid rgba(0, 242, 255, 0.3) !important;
         box-shadow: 0 0 10px rgba(0, 242, 255, 0.15) !important;
+        margin: 0 auto !important;
     }
-
-    .flex-img-label {
-        font-family: 'Rajdhani', sans-serif !important; 
-        color: #00f2ff !important; 
-        font-size: 0.85rem !important; 
-        margin-top: 8px !important;
-        letter-spacing: 1px !important;
-        font-weight: 600 !important;
-        line-height: 1.2 !important;
+    
+    /* Ensure mobile column blocks centers their text items cleanly */
+    [data-testid="column"] {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -97,6 +99,7 @@ def muat_foto_member(target_path):
             return [os.path.join(lokal_dir, f) for f in files if f.lower().endswith(('png', 'jpg', 'jpeg', 'webp'))]
         except Exception:
             return []
+            
     else:
         username = "andrey-creator"
         repo = "ec-member-gallery" 
@@ -144,10 +147,8 @@ with st.spinner("Retrieving Roster..."):
     daftar_foto = muat_foto_member(path_pencarian)
 
 if daftar_foto:
-    # Building a direct raw HTML element compilation to perfectly retain image paths and layout structural alignment
-    html_output = '<div class="flex-roster-container">'
-    
-    for url_atau_path in daftar_foto:
+    cols = st.columns(6) 
+    for idx, url_atau_path in enumerate(daftar_foto):
         if "\\" in url_atau_path or "/" in url_atau_path:
             nama_file = url_atau_path.replace("\\", "/").split('/')[-1].split('.')[0]
         else:
@@ -155,25 +156,10 @@ if daftar_foto:
             
         clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
         
-        # Resolving relative paths cleanly for inline element binding
-        src_path = url_atau_path
-        if not (src_path.startswith('http://') or src_path.startswith('https://')):
-            # Direct check conversion for standard system deployment paths
-            if os.path.exists(src_path):
-                # When using local media assets in pure markdown blocks inside Streamlit app structures,
-                # referencing them directly via file system links requires standard component configurations. 
-                # If path errors occur locally, fallback to serving them explicitly.
-                pass
-
-        html_output += f'''
-        <div class="flex-member-card">
-            <img src="{src_path}">
-            <div class="flex-img-label">{clean_name}</div>
-        </div>
-        '''
-        
-    html_output += '</div>'
-    st.markdown(html_output, unsafe_allow_html=True)
+        with cols[idx % 6]:
+            # Back to clean native image presentation with global structural overrides
+            st.image(url_atau_path, use_container_width=True)
+            st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
 else:
     st.info(f"Belum ada data member untuk {pilihan_batch.replace('-', ' ').upper()} - {pilihan_kelas.replace('-', ' ').upper()}.")
 
