@@ -117,7 +117,8 @@ with st.spinner("Retrieving Roster..."):
     daftar_foto = muat_foto_member(path_pencarian)
 
 if daftar_foto:
-    cols = st.columns(4) 
+    # Mengubah jumlah kolom dari 4 menjadi 6 agar ukuran gambar mengecil
+    cols = st.columns(6) 
     for idx, url_atau_path in enumerate(daftar_foto):
         if "\\" in url_atau_path or "/" in url_atau_path:
             nama_file = url_atau_path.replace("\\", "/").split('/')[-1].split('.')[0]
@@ -126,7 +127,8 @@ if daftar_foto:
             
         clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
         
-        with cols[idx % 4]:
+        # Penempatan grid disesuaikan dengan modulo 6
+        with cols[idx % 6]:
             st.image(url_atau_path, use_container_width=True)
             st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
 else:
