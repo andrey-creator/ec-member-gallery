@@ -1,4 +1,4 @@
-import streamlit as st
+         import streamlit as st
 import os
 import requests
 from urllib.parse import unquote
@@ -52,10 +52,27 @@ st.markdown("""
         font-family: 'Rajdhani', sans-serif; 
         color: #00f2ff; 
         font-size: 0.9rem; 
-        margin-top: -10px; 
+        margin-top: 5px; 
         margin-bottom: 25px;
         letter-spacing: 1px;
         font-weight: 600;
+    }
+    
+    /* Wrapper CSS untuk mengunci ukuran foto member agar tetap kecil di laptop maupun HP */
+    .member-card-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+    .member-card-wrapper img {
+        max-width: 150px !important; /* Batasi lebar maksimal foto */
+        width: 100% !important;
+        height: auto !important;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        border: 1px solid rgba(0, 242, 255, 0.3);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -117,7 +134,6 @@ with st.spinner("Retrieving Roster..."):
     daftar_foto = muat_foto_member(path_pencarian)
 
 if daftar_foto:
-    # Mengubah jumlah kolom dari 4 menjadi 6 agar ukuran gambar mengecil
     cols = st.columns(6) 
     for idx, url_atau_path in enumerate(daftar_foto):
         if "\\" in url_atau_path or "/" in url_atau_path:
@@ -127,9 +143,11 @@ if daftar_foto:
             
         clean_name = unquote(nama_file).replace('-', ' ').replace('_', ' ').upper()
         
-        # Penempatan grid disesuaikan dengan modulo 6
         with cols[idx % 6]:
+            # Menyisipkan div wrapper HTML untuk memaksa style ukuran gambar mengecil
+            st.markdown('<div class="member-card-wrapper">', unsafe_allow_html=True)
             st.image(url_atau_path, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
             st.markdown(f'<p class="img-label">{clean_name}</p>', unsafe_allow_html=True)
 else:
     st.info(f"Belum ada data member untuk {pilihan_batch.replace('-', ' ').upper()} - {pilihan_kelas.replace('-', ' ').upper()}.")
