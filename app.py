@@ -15,24 +15,6 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-
-    st.markdown("""
-<style>
-@media (max-width:768px){
-
-    div[data-testid="stHorizontalBlock"]{
-        display:flex !important;
-        flex-wrap:nowrap !important;
-        gap:10px !important;
-    }
-
-    div[data-testid="column"]{
-        width:50% !important;
-        min-width:50% !important;
-        flex:0 0 50% !important;
-    }
-}
-""", unsafe_allow_html=True)
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
     
     .header-container { text-align: center; padding: 20px 0; }
