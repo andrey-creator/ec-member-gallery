@@ -7,9 +7,8 @@ import requests
 from urllib.parse import unquote
 from PIL import Image
 
-TARGET_W, TARGET_H = 280, 360  # 2x ukuran tampil (140x180) untuk retina, tetap kecil filenya
+TARGET_W, TARGET_H = 280, 360 
 
-# Fallback default kalau folder lokal & GitHub sama-sama tidak bisa dibaca
 DEFAULT_BATCH = ["batch-2025-2026", "batch-2026-2027"]
 DEFAULT_KELAS = ["kelas-x", "kelas-xi"]
 
@@ -120,7 +119,7 @@ def daftar_opsi_batch_kelas():
     & kelas secara otomatis, dengan fallback ke daftar default kalau gagal."""
     batch_list, kelas_set = [], set()
 
-    # 1) Coba scan folder lokal
+
     if os.path.isdir(PHOTOS_ROOT):
         try:
             for b in sorted(os.listdir(PHOTOS_ROOT)):
@@ -150,7 +149,7 @@ def daftar_opsi_batch_kelas():
         elif resp.status_code == 403:
             return DEFAULT_BATCH, DEFAULT_KELAS, "GitHub API rate limit tercapai, memakai daftar default."
         elif resp.status_code == 404:
-            return DEFAULT_BATCH, DEFAULT_KELAS, None  # repo/folder belum ada, wajar, tidak perlu warning
+            return DEFAULT_BATCH, DEFAULT_KELAS, None 
         else:
             return DEFAULT_BATCH, DEFAULT_KELAS, f"GitHub API mengembalikan status {resp.status_code}, memakai daftar default."
     except requests.exceptions.RequestException as e:
@@ -196,7 +195,7 @@ def muat_foto_member(target_path):
                         src = f"data:image/jpeg;base64,{b64}"
                     except Exception:
                         continue
-                    # FIX #4: nama dipakai sebagai key sort, urutkan setelah parsing
+
                     nama_file, _ = os.path.splitext(f)
                     nama = unquote(nama_file).replace("-", " ").replace("_", " ").upper()
                     hasil.append({"src": src, "nama": nama})
@@ -206,7 +205,7 @@ def muat_foto_member(target_path):
         hasil.sort(key=lambda x: x["nama"])
         return hasil, None
 
-    # Fallback: ambil dari GitHub
+
     url = f"https://api.github.com/repos/{GITHUB_USERNAME}/{GITHUB_REPO}/contents/{target_path}"
 
     try:
@@ -224,7 +223,7 @@ def muat_foto_member(target_path):
             return hasil, None
 
         elif response.status_code == 404:
-            # Folder memang belum ada di repo -> bukan error, cuma kosong
+
             return [], None
 
         elif response.status_code == 403:
@@ -253,7 +252,7 @@ with col_back:
 
 st.write("##")
 
-# FIX #5: daftar batch & kelas diambil otomatis, bukan hardcode
+
 daftar_batch, daftar_kelas, pesan_opsi = daftar_opsi_batch_kelas()
 if pesan_opsi:
     st.warning(pesan_opsi)
@@ -264,7 +263,7 @@ with col_filter1:
 with col_filter2:
     pilihan_kelas = st.selectbox("CHOOSE CLASS / TINGKATAN", daftar_kelas)
 with col_refresh:
-    st.write("")  # spacer biar sejajar vertikal dengan selectbox
+    st.write("") 
     st.write("")
     if st.button("🔄 Refresh"):
         muat_foto_member.clear()
@@ -284,7 +283,7 @@ if pesan_error:
 if daftar_foto:
     cards = []
     for foto in daftar_foto:
-        # FIX #6: sanitasi HTML lengkap pakai html.escape, bukan cuma ganti kutip
+
         nama_aman = html.escape(foto['nama'])
         cards.append(
             '<div class="roster-card">'
