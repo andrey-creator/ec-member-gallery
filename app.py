@@ -1,8 +1,12 @@
 import streamlit as st
 import os
 import base64
+import io
 import requests
 from urllib.parse import unquote
+from PIL import Image
+
+TARGET_W, TARGET_H = 280, 360  # 2x ukuran tampil (140x180) untuk retina, tetap kecil filenya
 
 DAFTAR_BATCH = ["batch-2025-2026", "batch-2026-2027"]
 DAFTAR_KELAS = ["kelas-x", "kelas-xi"]
@@ -92,7 +96,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 
-@st.cache_data(ttl=2)
+@st.cache_data(ttl=3600, show_spinner=False)
 def muat_foto_member(target_path):
     """
     Mengembalikan list of dict: [{"src": <url atau data-uri>, "nama": <str>}, ...]
@@ -106,11 +110,27 @@ def muat_foto_member(target_path):
             for f in files:
                 if f.lower().endswith(('png', 'jpg', 'jpeg', 'webp')):
                     full_path = os.path.join(lokal_dir, f)
-                    with open(full_path, "rb") as img_file:
-                        b64 = base64.b64encode(img_file.read()).decode()
-                    ext = f.split(".")[-1].lower()
-                    mime = "jpeg" if ext == "jpg" else ext
-                    src = f"data:image/{mime};base64,{b64}"
+                    try:
+                        img = Image.open(full_path)
+                        img = img.convert("RGB")
+                        # crop-to-fill supaya rasio pas sebelum resize, hindari distorsi
+                        src_ratio = img.width / img.height
+                        target_ratio = TARGET_W / TARGET_H
+                        if src_ratio > target_ratio:
+                            new_w = int(img.height * target_ratio)
+                            left = (img.width - new_w) // 2
+                            img = img.crop((left, 0, left + new_w, img.height))
+                        else:
+                            new_h = int(img.width / target_ratio)
+                            top = (img.height - new_h) // 2
+                            img = img.crop((0, top, img.width, top + new_h))
+                        img = img.resize((TARGET_W, TARGET_H), Image.LANCZOS)
+                        buf = io.BytesIO()
+                        img.save(buf, format="JPEG", quality=80, optimize=True)
+                        b64 = base64.b64encode(buf.getvalue()).decode()
+                        src = f"data:image/jpeg;base64,{b64}"
+                    except Exception:
+                        continue
                     nama = unquote(f.split(".")[0]).replace("-", " ").replace("_", " ").upper()
                     hasil.append({"src": src, "nama": nama})
         except Exception:
@@ -155,11 +175,17 @@ with col_back:
 
 st.write("##")
 
-col_filter1, col_filter2 = st.columns(2)
+col_filter1, col_filter2, col_refresh = st.columns([2, 2, 1])
 with col_filter1:
     pilihan_batch = st.selectbox("CHOOSE BATCH / ANGKATAN", DAFTAR_BATCH)
 with col_filter2:
     pilihan_kelas = st.selectbox("CHOOSE CLASS / TINGKATAN", DAFTAR_KELAS)
+with col_refresh:
+    st.write("")  # spacer biar sejajar vertikal dengan selectbox
+    st.write("")
+    if st.button("🔄 Refresh"):
+        muat_foto_member.clear()
+        st.rerun()
 
 path_pencarian = f"{pilihan_batch}/{pilihan_kelas}"
 
